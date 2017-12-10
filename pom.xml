@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>exercise_01</groupId>
+    <artifactId>exercise_01</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>sample-performance-with-gatling</name>
+    <properties>
+        <gatling.version>2.2.0-M2</gatling.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>3.2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>io.gatling</groupId>
+                <artifactId>gatling-maven-plugin</artifactId>
+                <version>${gatling.version}</version>
+                <configuration>
+                    <jvmArgs>
+                        <jvmArg>-Durl=https://pff.yggdrasilgaming.com</jvmArg>
+                        <jvmArg>-DnumberOfUsers=1</jvmArg>
+                        <jvmArg>-DdurationMinutes=1</jvmArg>
+                        <jvmArg>-DpauseBetweenRequestsMs=2000</jvmArg>
+                    </jvmArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
