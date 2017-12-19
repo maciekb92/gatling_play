@@ -1,13 +1,8 @@
 package com.exercise.elements
 
-import java.beans.Expression
-
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import io.gatling.http.check.HttpCheck
-
 import scala.concurrent.duration._
-
 
 object Constants {
 
