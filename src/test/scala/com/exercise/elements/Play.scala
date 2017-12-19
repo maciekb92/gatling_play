@@ -2,46 +2,46 @@ package com.exercise.elements
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import io.gatling.http.check.HttpCheck
 
 object Play {
 
-  val scn = scenario("Play")
-      .exec(http("Authorization")
+  val scn = scenario("Play_Request")
+    .exec(http("Authorization")
       .get("/game.web/service")
       .queryParam("fn", "authenticate")
       .queryParam("org", "Demo")
       .queryParam("gameid", "7316")
       .check(jsonPath("$.data.sessid").saveAs("sessId"))
     ).pause(Constants.pause)
-
-    .exec(session => {
-
-      val getCmd = Constants.checkCmd
-
-      do {
-        http("Play")
-          .get("/game.web/service")
-          .queryParam("fn", "play")
-          .queryParam("org", "Demo")
-          .queryParam("gameid", "7316")
-          .queryParam("sessid", "${session(\"sessId\")}")
-          .queryParam("currency", "EUR")
-          .queryParam("amount", "0.25")
-          .queryParam("coin", "0.01")
-          getCmd
-        //.check(jsonPath("$.data.wager.bets[0].betdata.cmd").optional.saveAs("cmd"))
-      } while(getCmd.toString != "C")
-
-      val cmd = session("cmd").as[String]
-
-      val checkWonAmount: HttpCheck = session("cmd").asOption[String] match {
-        case Some("C") => jsonPath("$.data.wager.bets[-1].wonamount").ofType[Double].saveAs("wonAmount")
-        case _ => jsonPath("")
-      }
-
-      //val wonAmount = session("wonAmount").as[Double]
-
-      session
-    })
+    .asLongAs( session => session("wonAmount").validate[String].map(wonAmount => !wonAmount.contains("0.00")).recover(true))
+    {
+      exec(http("Play")
+        .get("/game.web/service")
+        .queryParam("fn", "play")
+        .queryParam("org", "Demo")
+        .queryParam("gameid", "7316")
+        .queryParam("sessid", "${sessId}")
+        .queryParam("currency", "EUR")
+        .queryParam("amount", "0.25")
+        .queryParam("coin", "0.01")
+        .check(jsonPath("$.data.wager.bets[0].eventdata.accWa").saveAs("accWa"))
+        .check(jsonPath("$.data.wager.wagerid").saveAs("wagerId"))
+      ).pause(Constants.pause)
+        .doIf(session => session("accWa").as[String] != "0.00")
+        {
+          exec(http("Collect")
+            .get("/game.web/service")
+            .queryParam("fn", "play")
+            .queryParam("gameid", "7316")
+            .queryParam("sessid", "${sessId}")
+            .queryParam("currency", "EUR")
+            .queryParam("amount", "0")
+            .queryParam("wagerid", "${wagerId}")
+            .queryParam("betid", "1")
+            .queryParam("step", "2")
+            .queryParam("cmd", "C")
+            .check(jsonPath("$.data.wager.bets[0].wonamount").findAll.saveAs("wonAmount"))
+          ).pause(Constants.pause)
+        }
+    }
 }

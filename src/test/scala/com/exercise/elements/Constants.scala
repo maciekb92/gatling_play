@@ -16,8 +16,6 @@ object Constants {
   val pause: FiniteDuration = System.getProperty("pauseBetweenRequestsMs").toInt.millisecond
   private val url: String = System.getProperty("url")
   private val successStatus: Int = 200
-  val checkCmd: HttpCheck = jsonPath("$.data.wager.bets[0].betdata.cmd").optional.saveAs("cmd")
-
 
   val httpConf = http
     .baseURL(url)
